@@ -1,0 +1,11 @@
+body {
+    margin: 0;
+}
+
+section.menu {
+    width: 100vw;
+    height: 60px;
+    top: 0;
+    left: 0;
+    background-color: aqua;
+}
