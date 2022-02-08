@@ -1,5 +1,7 @@
 body {
     margin: 0;
+    height: 100vh;
+    width: 100vw;
 }
 
 section.menu {
@@ -7,5 +9,40 @@ section.menu {
     height: 60px;
     top: 0;
     left: 0;
-    background-color: aqua;
+    background-color: lightskyblue;
+    display: flex;
+    align-items: center;
 }
+
+section.menu > a {
+    position: relative;
+    top: 0;
+    font-size: 200%;
+}
+
+#start {
+    left: 20px;
+}
+
+#games {
+    left: 40px;
+}
+
+#login {
+    left: 80%;
+}
+
+main {
+    width: 100vw;
+    height: 90%;
+}
+
+#startcontainer {
+    height: 100%;
+    width: 100vw;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    font-size: 200%;
+}
+
