@@ -34,15 +34,16 @@ section.menu > a {
 
 main {
     width: 100vw;
-    height: 90%;
+    min-height: 90%;
+    height: fit-content;
 }
 
 #startcontainer {
     height: 100%;
     width: 100vw;
     display: flex;
+    flex-direction: column;
     justify-content: space-around;
     align-items: center;
     font-size: 200%;
 }
-

@@ -1,2 +1,9 @@
 section id="startcontainer"
     h1 Välkommen!
+    h5 Ny användare? Registrera dig nedanför!
+    form action="users/new" method="POST"
+        input type="text" name="username" placeholder="Skriv ditt användarnamn"/
+        input type="text" name="password" placeholder="Skriv ditt lösenord"/
+        input type="text" name="password_confirm" placeholder="Bekräfta ditt lösenord"/
+        input type="range" name="usertype" min="1" max="2" step="1"/
+        input type="submit" value="Registrera användare"/
