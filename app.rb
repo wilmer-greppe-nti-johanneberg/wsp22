@@ -16,10 +16,13 @@ get('/') do
 end
 
 get('/games') do
-    db = get_database('db/data.db')
-    test = db.execute("SELECT * FROM games")
-    p test
-    slim(:"games/index")
+    if session[:id] == nil
+        "Du måste vara inloggad för att se spelen!"
+    else
+        db = get_database('db/data.db')
+        result = db.execute("SELECT * FROM games")
+        slim(:"games/index",locals:{games:result})
+    end
 end
 
 post('/users/new') do
@@ -41,5 +44,25 @@ post('/users/new') do
         end
     else
         "Ett fel uppstod: Användaren finns redan!"
+    end
+end
+
+get('/login') do
+    slim(:login)
+end
+
+post('/users/login') do
+    username = params[:username]
+    password = params[:password]
+    db = get_database('db/data.db')
+    result = db.execute("SELECT * FROM users WHERE username = ?",username).first
+    pwdigest = result["password"]
+    id = result["id"]
+
+    if BCrypt::Password.new(pwdigest) == password
+        session[:id] = id
+        redirect('/games')
+    else
+        "Fel lösenord eller användarnamn!"
     end
 end

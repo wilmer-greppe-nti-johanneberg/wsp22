@@ -39,11 +39,15 @@ main {
 }
 
 #startcontainer {
-    height: 100%;
+    height: calc(100vh - 60px);
     width: 100vw;
     display: flex;
     flex-direction: column;
     justify-content: space-around;
     align-items: center;
     font-size: 200%;
+}
+
+.formpadding {
+    padding-bottom: 10%;
 }
