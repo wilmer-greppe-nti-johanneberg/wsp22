@@ -1,3 +1,9 @@
 section id="gamecontainer"
-- games.each do |game|
-    p = game
+ol
+    - games.each do |game|
+      li 
+        a href="games/#{game['id']}" #{game["title"]}
+        - if is_admin
+            a href="games/#{game['id']}/edit" Uppdatera
+            form method="POST" action="games/#{game['id']}/delete"
+              input type="submit" value="Delete"

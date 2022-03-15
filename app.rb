@@ -15,13 +15,26 @@ get('/') do
     slim(:start)
 end
 
+get('/games/:id') do
+    if session[:id] == nil
+        "Du måste vara inloggad för att se spelen!"
+    else
+        id = params[:id].to_i
+        db = get_database('db/data.db')
+        result = db.execute("SELECT * FROM games WHERE id = ?",id).first
+        slim(:"games/show",locals:{games:result,studio:studio})
+    end
+end
+
 get('/games') do
     if session[:id] == nil
         "Du måste vara inloggad för att se spelen!"
     else
         db = get_database('db/data.db')
         result = db.execute("SELECT * FROM games")
-        slim(:"games/index",locals:{games:result})
+        user = db.execute("SELECT usertype FROM users WHERE id = ?",session[:id]).first
+        is_admin = user["usertype"] == 2
+        slim(:"games/index",locals:{games:result,is_admin:is_admin})
     end
 end
 
