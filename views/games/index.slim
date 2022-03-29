@@ -2,7 +2,7 @@ section id="gamecontainer"
 ol
     - games.each do |game|
       li 
-        a href="games/#{game['id']}" #{game["title"]}
+        a href="games/#{game['id']}" #{game['title']}
         - if is_admin
             a href="games/#{game['id']}/edit" Uppdatera
             form method="POST" action="games/#{game['id']}/delete"

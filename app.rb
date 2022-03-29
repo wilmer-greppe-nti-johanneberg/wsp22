@@ -45,7 +45,7 @@ post('/users/new') do
     usertype = params[:usertype]
     db = get_database('db/data.db')
 
-    result = db.execute("SELECT id FROM users WHERE username=?", username)
+    result = db.execute("SELECT id FROM users WHERE username = ?", username)
 
     if result.empty?
         if password == password_confirm
