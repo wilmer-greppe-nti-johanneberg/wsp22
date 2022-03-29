@@ -15,17 +15,6 @@ get('/') do
     slim(:start)
 end
 
-get('/games/:id') do
-    if session[:id] == nil
-        "Du måste vara inloggad för att se spelen!"
-    else
-        id = params[:id].to_i
-        db = get_database('db/data.db')
-        result = db.execute("SELECT * FROM games WHERE id = ?",id).first
-        slim(:"games/show",locals:{games:result,studio:studio})
-    end
-end
-
 get('/games') do
     if session[:id] == nil
         "Du måste vara inloggad för att se spelen!"
@@ -35,6 +24,58 @@ get('/games') do
         user = db.execute("SELECT usertype FROM users WHERE id = ?",session[:id]).first
         is_admin = user["usertype"] == 2
         slim(:"games/index",locals:{games:result,is_admin:is_admin})
+    end
+end
+
+get('/games/new') do
+    if session[:id] == nil
+        "Du måste vara inloggad för att se spelen!"
+    else
+        db = get_database('db/data.db')
+        user = db.execute("SELECT usertype FROM users WHERE id = ?",session[:id]).first
+        if user["usertype"] == 2
+            slim(:"games/new")
+        else
+            "Du har ej behörighet att visa denna sida!"
+        end
+    end
+end
+
+post('/games/new') do
+    title = params[:title]
+    price = params[:price].to_f
+    studioname = params[:studioname]
+    db = get_database('db/data.db')
+    studio = db.execute("SELECT id FROM studios WHERE name = ?",studioname).first
+    if studio == nil
+        db.execute("INSERT INTO studios (name) VALUES (?)",studioname)
+        studio = db.execute("SELECT id FROM studios WHERE name = ?",studioname).first
+    end
+    result = db.execute("SELECT * FROM games WHERE title = ?",title)
+    if result.empty?
+        db.execute("INSERT INTO games (title,price,studio_id) VALUES (?,?,?)",title,price,studio["id"])
+        redirect('/games')
+    else
+        "Ett fel uppstod: Spelet finns redan!"
+    end
+end
+
+post('/games/:id/delete') do
+    id = params[:id].to_i
+    db = get_database('db/data.db')
+    db.execute("DELETE FROM games WHERE id = ?",id)
+    redirect('/games')
+end
+
+get('/games/:id') do
+    if session[:id] == nil
+        "Du måste vara inloggad för att se spelen!"
+    else
+        id = params[:id].to_i
+        db = get_database('db/data.db')
+        result = db.execute("SELECT * FROM games WHERE id = ?",id).first
+        studio = db.execute("SELECT name FROM studios WHERE id IN (SELECT studio_id FROM games WHERE id = ?)",id).first
+        slim(:"games/show",locals:{game:result,studio:studio})
     end
 end
 
