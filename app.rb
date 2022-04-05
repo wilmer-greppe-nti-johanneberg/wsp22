@@ -67,6 +67,29 @@ post('/games/:id/delete') do
     redirect('/games')
 end
 
+post('/games/:id/update') do
+    id = params[:id].to_i
+    title = params[:title]
+    price = params[:price].to_f
+    studio_name = params[:studio_name]
+    db = get_database('db/data.db')
+    result = db.execute("SELECT id FROM studios WHERE name = ?",studio_name).first
+    if result == nil
+        db.execute("INSERT INTO studios (name) VALUES (?)",studio_name)
+        result = db.execute("SELECT id FROM studios WHERE name = ?",studio_name).first
+    end
+    db.execute("UPDATE games SET title=?,price=?,studio_id=? WHERE id = ?",title,price,result["id"],id)
+    redirect('/games')
+end
+
+get('/games/:id/edit') do
+    id = params[:id].to_i
+    db = get_database('db/data.db')
+    result = db.execute("SELECT * FROM games WHERE id = ?",id).first
+    result2 = db.execute("SELECT * FROM studios WHERE id = ?",result["studio_id"]).first
+    slim(:"/games/edit",locals:{result:result,result2:result2})
+end
+
 get('/games/:id') do
     if session[:id] == nil
         "Du måste vara inloggad för att se spelen!"
@@ -110,12 +133,16 @@ post('/users/login') do
     password = params[:password]
     db = get_database('db/data.db')
     result = db.execute("SELECT * FROM users WHERE username = ?",username).first
-    pwdigest = result["password"]
-    id = result["id"]
+    if result != nil
+        pwdigest = result["password"]
+        id = result["id"]
 
-    if BCrypt::Password.new(pwdigest) == password
-        session[:id] = id
-        redirect('/games')
+        if BCrypt::Password.new(pwdigest) == password
+            session[:id] = id
+            redirect('/games')
+        else
+            "Fel lösenord eller användarnamn!"
+        end
     else
         "Fel lösenord eller användarnamn!"
     end
