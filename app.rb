@@ -44,6 +44,11 @@ end
 post('/games/new') do
     title = params[:title]
     price = params[:price].to_f
+    tag1 = params[:tag1]
+    tag2 = params[:tag2]
+    tag3 = params[:tag3]
+    tag4 = params[:tag4]
+    tag5 = params[:tag5]
     studioname = params[:studioname]
     db = get_database('db/data.db')
     studio = db.execute("SELECT id FROM studios WHERE name = ?",studioname).first
@@ -52,8 +57,19 @@ post('/games/new') do
         studio = db.execute("SELECT id FROM studios WHERE name = ?",studioname).first
     end
     result = db.execute("SELECT * FROM games WHERE title = ?",title)
+    genre1 = db.execute("SELECT id FROM genres WHERE title = ?",tag1).first
+    genre2 = db.execute("SELECT id FROM genres WHERE title = ?",tag2).first
+    genre3 = db.execute("SELECT id FROM genres WHERE title = ?",tag3).first
+    genre4 = db.execute("SELECT id FROM genres WHERE title = ?",tag4).first
+    genre5 = db.execute("SELECT id FROM genres WHERE title = ?",tag5).first
     if result.empty?
         db.execute("INSERT INTO games (title,price,studio_id) VALUES (?,?,?)",title,price,studio["id"])
+        game = db.execute("SELECT id FROM games WHERE title = ?",title).first
+        db.execute("INSERT INTO game_genre_relation (game_id,genre_id) VALUES (?,?)",game["id"],genre1["id"])
+        db.execute("INSERT INTO game_genre_relation (game_id,genre_id) VALUES (?,?)",game["id"],genre2["id"])
+        db.execute("INSERT INTO game_genre_relation (game_id,genre_id) VALUES (?,?)",game["id"],genre3["id"])
+        db.execute("INSERT INTO game_genre_relation (game_id,genre_id) VALUES (?,?)",game["id"],genre4["id"])
+        db.execute("INSERT INTO game_genre_relation (game_id,genre_id) VALUES (?,?)",game["id"],genre5["id"])
         redirect('/games')
     else
         "Ett fel uppstod: Spelet finns redan!"
@@ -71,6 +87,11 @@ post('/games/:id/update') do
     id = params[:id].to_i
     title = params[:title]
     price = params[:price].to_f
+    tag1 = params[:tag1]
+    tag2 = params[:tag2]
+    tag3 = params[:tag3]
+    tag4 = params[:tag4]
+    tag5 = params[:tag5]
     studio_name = params[:studio_name]
     db = get_database('db/data.db')
     result = db.execute("SELECT id FROM studios WHERE name = ?",studio_name).first
@@ -78,7 +99,25 @@ post('/games/:id/update') do
         db.execute("INSERT INTO studios (name) VALUES (?)",studio_name)
         result = db.execute("SELECT id FROM studios WHERE name = ?",studio_name).first
     end
+    game = db.execute("SELECT id FROM games WHERE title = ?",title).first
     db.execute("UPDATE games SET title=?,price=?,studio_id=? WHERE id = ?",title,price,result["id"],id)
+
+    currenttags = db.execute("SELECT genre_id FROM game_genre_relation WHERE game_id = ?",id)
+    genre1 = db.execute("SELECT id FROM genres WHERE title = ?",tag1).first
+    genre2 = db.execute("SELECT id FROM genres WHERE title = ?",tag2).first
+    genre3 = db.execute("SELECT id FROM genres WHERE title = ?",tag3).first
+    genre4 = db.execute("SELECT id FROM genres WHERE title = ?",tag4).first
+    genre5 = db.execute("SELECT id FROM genres WHERE title = ?",tag5).first
+    relation1 = db.execute("SELECT id FROM game_genre_relation WHERE game_id = ? AND genre_id = ?",game["id"],currenttags[0]["genre_id"]).first
+    relation2 = db.execute("SELECT id FROM game_genre_relation WHERE game_id = ? AND genre_id = ?",game["id"],currenttags[1]["genre_id"]).first
+    relation3 = db.execute("SELECT id FROM game_genre_relation WHERE game_id = ? AND genre_id = ?",game["id"],currenttags[2]["genre_id"]).first
+    relation4 = db.execute("SELECT id FROM game_genre_relation WHERE game_id = ? AND genre_id = ?",game["id"],currenttags[3]["genre_id"]).first
+    relation5 = db.execute("SELECT id FROM game_genre_relation WHERE game_id = ? AND genre_id = ?",game["id"],currenttags[4]["genre_id"]).first
+    db.execute("UPDATE game_genre_relation SET genre_id=? WHERE id = ?",genre1["id"],relation1["id"])
+    db.execute("UPDATE game_genre_relation SET genre_id=? WHERE id = ?",genre2["id"],relation2["id"])
+    db.execute("UPDATE game_genre_relation SET genre_id=? WHERE id = ?",genre3["id"],relation3["id"])
+    db.execute("UPDATE game_genre_relation SET genre_id=? WHERE id = ?",genre4["id"],relation4["id"])
+    db.execute("UPDATE game_genre_relation SET genre_id=? WHERE id = ?",genre5["id"],relation5["id"])
     redirect('/games')
 end
 
