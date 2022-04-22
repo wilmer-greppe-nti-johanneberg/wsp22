@@ -3,3 +3,7 @@ h1 = game["title"]
 p Cost: #{game["price"]}$
 p Studio: #{studio["name"]}
 p Genre: 
+
+ul
+    - tags.each do |tag|
+        li #{tag["title"]}

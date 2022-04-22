@@ -11,34 +11,58 @@ def get_database(path)
     return db
 end
 
+def check_login_status()
+    if session[:id] == nil
+        session[:error] = "Du måste vara inloggad för att se detta innehåll!"
+        redirect('/error')
+    end
+end
+
+def check_admin_rights()
+    db = get_database('db/data.db')
+    user = db.execute("SELECT usertype FROM users WHERE id = ?",session[:id]).first
+    if user["usertype"] != 2
+        session[:error] = "Du har ej behörighet att visa innehållet"
+        redirect('/error')
+    end
+end
+
 get('/') do
     slim(:start)
 end
 
+get('/error') do
+    error = session[:error]
+    slim(:error,locals:{error:error})
+end
+
+before('/games') do
+    check_login_status()
+end
+
+before('/games/new') do
+    check_login_status()
+    check_admin_rights()
+end
+
+before('/games/:id') do
+    check_login_status()
+end
+
+before('/games/:id/edit') do
+    check_login_status()
+    check_admin_rights()
+end
+
 get('/games') do
-    if session[:id] == nil
-        "Du måste vara inloggad för att se spelen!"
-    else
-        db = get_database('db/data.db')
-        result = db.execute("SELECT * FROM games")
-        user = db.execute("SELECT usertype FROM users WHERE id = ?",session[:id]).first
-        is_admin = user["usertype"] == 2
-        slim(:"games/index",locals:{games:result,is_admin:is_admin})
-    end
+    p session[:is_admin]
+    db = get_database('db/data.db')
+    result = db.execute("SELECT * FROM games")
+    slim(:"games/index",locals:{games:result,is_admin:session[:is_admin]})
 end
 
 get('/games/new') do
-    if session[:id] == nil
-        "Du måste vara inloggad för att se spelen!"
-    else
-        db = get_database('db/data.db')
-        user = db.execute("SELECT usertype FROM users WHERE id = ?",session[:id]).first
-        if user["usertype"] == 2
-            slim(:"games/new")
-        else
-            "Du har ej behörighet att visa denna sida!"
-        end
-    end
+    slim(:"games/new")
 end
 
 post('/games/new') do
@@ -80,6 +104,7 @@ post('/games/:id/delete') do
     id = params[:id].to_i
     db = get_database('db/data.db')
     db.execute("DELETE FROM games WHERE id = ?",id)
+    db.execute("DELETE FROM game_genre_relation WHERE game_id = ?",id)
     redirect('/games')
 end
 
@@ -126,19 +151,17 @@ get('/games/:id/edit') do
     db = get_database('db/data.db')
     result = db.execute("SELECT * FROM games WHERE id = ?",id).first
     result2 = db.execute("SELECT * FROM studios WHERE id = ?",result["studio_id"]).first
-    slim(:"/games/edit",locals:{result:result,result2:result2})
+    tags = db.execute("SELECT title FROM genres INNER JOIN game_genre_relation ON genres.id == game_genre_relation.genre_id WHERE game_genre_relation.game_id = ?",id)
+    slim(:"/games/edit",locals:{result:result,result2:result2,tags:tags})
 end
 
 get('/games/:id') do
-    if session[:id] == nil
-        "Du måste vara inloggad för att se spelen!"
-    else
-        id = params[:id].to_i
-        db = get_database('db/data.db')
-        result = db.execute("SELECT * FROM games WHERE id = ?",id).first
-        studio = db.execute("SELECT name FROM studios WHERE id IN (SELECT studio_id FROM games WHERE id = ?)",id).first
-        slim(:"games/show",locals:{game:result,studio:studio})
-    end
+    id = params[:id].to_i
+    db = get_database('db/data.db')
+    result = db.execute("SELECT * FROM games WHERE id = ?",id).first
+    studio = db.execute("SELECT name FROM studios WHERE id IN (SELECT studio_id FROM games WHERE id = ?)",id).first
+    tags = db.execute("SELECT title FROM genres INNER JOIN game_genre_relation ON genres.id == game_genre_relation.genre_id WHERE game_genre_relation.game_id = ?",id)
+    slim(:"games/show",locals:{game:result,studio:studio,tags:tags})
 end
 
 post('/users/new') do
@@ -175,9 +198,12 @@ post('/users/login') do
     if result != nil
         pwdigest = result["password"]
         id = result["id"]
-
         if BCrypt::Password.new(pwdigest) == password
             session[:id] = id
+            user = db.execute("SELECT usertype FROM users WHERE id = ?",session[:id]).first
+            if user["usertype"] == 2
+                session[:is_admin] = true
+            end
             redirect('/games')
         else
             "Fel lösenord eller användarnamn!"
