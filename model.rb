@@ -171,6 +171,7 @@ module Model
     def get_game_info(id)
         db = get_database('db/data.db')
         result = db.execute("SELECT * FROM games WHERE id = ?",id).first
+        p result
         studio = db.execute("SELECT * FROM studios WHERE id = ?",result["studio_id"]).first
         tags = db.execute("SELECT title FROM genres INNER JOIN game_genre_relation ON genres.id == game_genre_relation.genre_id WHERE game_genre_relation.game_id = ?",id)
         return [result, studio, tags]
@@ -235,5 +236,4 @@ module Model
         session[:error] = "Fel lösenord eller användarnamn!"
         redirect('/error')
     end
-    
 end

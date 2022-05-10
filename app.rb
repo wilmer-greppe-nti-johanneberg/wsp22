@@ -79,7 +79,7 @@ end
 # @param [String] studioname, The title of the game studio
 # 
 # @see Model#create_new_game
-post('/games/new') do
+post('/games') do
     title = params[:title]
     price = params[:price].to_f
     tags = [params[:tag1],
@@ -145,8 +145,10 @@ end
 # @see Model#get_game_info
 get('/games/:id') do
     id = params[:id].to_i
+    user_id = session[:id]
+    is_liked = get_like_info(id,user_id)
     info = get_game_info(id)
-    slim(:"games/show",locals:{game:info[0],studio:info[1],tags:info[2]})
+    slim(:"games/show",locals:{game:info[0],studio:info[1],tags:info[2],is_liked:is_liked})
 end
 
 # Creates a new user and redirects to start page if creating was successful
