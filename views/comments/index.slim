@@ -1,0 +1,9 @@
+h1 Dina kommentarer 
+
+ul
+    - comments.each do |comment|
+        li 
+            p #{comment["comment"]}
+            a href="comments/#{comment['id']}/edit" Uppdatera
+            form method="POST" action="comments/#{comment['id']}/delete"
+              input type="submit" value="Delete"

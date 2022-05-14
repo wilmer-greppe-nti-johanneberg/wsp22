@@ -7,3 +7,14 @@ p Genre:
 ul
     - tags.each do |tag|
         li #{tag["title"]}
+
+h3 Kommentarer:
+a href="/comments/#{game['id']}/new" Kommentera
+
+ul
+    - comments.each do |comment|
+        li 
+            p #{comment["comment"]}
+            a href="/comments/#{comment['id']}/edit" Uppdatera
+            form method="POST" action="/comments/#{comment['id']}/delete"
+              input type="submit" value="Delete"

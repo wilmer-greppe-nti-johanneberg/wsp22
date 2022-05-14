@@ -23,38 +23,58 @@ end
 
 # Checks login status before displaying games
 # 
-# @see Model#get_login_status
+# @see Model#check_login_status
 before('/games') do
-    check_login_status()
+    if !check_login_status(session[:id])
+        session[:error] = "Du måste vara inloggad för att se detta innehåll!"
+        redirect('/error')
+    end
 end
 
 # Checks login and admin status
 # before displaying form to add a game
 # 
-# @see Model#get_login_status
-# @see Model#get_admin_status
+# @see Model#check_login_status
+# @see Model#check_admin_rights
 before('/games/new') do
-    check_login_status()
-    check_admin_rights()
+    if !check_login_status(session[:id]) || !check_admin_rights(session[:id])
+        session[:error] = "Du har ej behörighet att visa innehållet"
+        redirect('/error')
+    end
 end
 
 # Checks login status before displaying game info
 #
 # @param [Integer] :id, the id of the game
-# @see Model#get_login_status
+# @see Model#check_login_status
 before('/games/:id') do
-    check_login_status()
+    if !check_login_status(session[:id])
+        session[:error] = "Du måste vara inloggad för att visa innehållet"
+        redirect('/error')
+    end
 end
 
 # Checks login and admin status
 # before displaying game info edit form
 # 
-# @param [Integer] :id, the id of the game
-# @see Model#get_login_status
-# @see Model#get_admin_status
+# @see Model#check_login_status
+# @see Model#check_admin_rights
 before('/games/:id/edit') do
-    check_login_status()
-    check_admin_rights()
+    if !check_login_status(session[:id]) || !check_admin_rights(session[:id])
+        session[:error] = "Du har ej behörighet att visa innehållet"
+        redirect('/error')
+    end
+end
+
+# Checks login status before displaying user comments
+#
+# @param [Integer] :id, the id of current user
+# @see Model#check_login_status
+before('/comments') do
+    if !check_login_status(session[:id])
+        session[:error] = "Du måste vara inloggad för att visa innehållet"
+        redirect('/error')
+    end
 end
 
 # Displays lists of games
@@ -88,7 +108,16 @@ post('/games') do
             params[:tag4],
             params[:tag5]]
     studioname = params[:studioname]
-    create_new_game(title, price, tags, studioname)
+    if title == "" or params[:tag1] = "" or params[:tag2] = "" or params[:tag3] = "" or params[:tag4] = "" or params[:tag5] = "" or studio_name == ""
+        session[:error] = "Fälten får inte vara tomma"
+        redirect('/error')
+    end
+    if create_new_game(title, price, tags, studioname)
+        redirect('/games')
+    else
+        session[:error] = "Spelet kunde inte skapas, kolla så att taggarna är unika eller om spelet redan finns."
+        redirect('/error')
+    end
 end
 
 # Deletes selected game and redirects to /games
@@ -123,6 +152,10 @@ post('/games/:id/update') do
         params[:tag5]
     ]
     studio_name = params[:studio_name]
+    if title == "" or params[:tag1] = "" or params[:tag2] = "" or params[:tag3] = "" or params[:tag4] = "" or params[:tag5] = "" or studio_name == 
+        session[:error] = "Fälten får inte vara tomma"
+        redirect('/error')
+    end
     update_game_info(id, title, price, tags, studio_name)
     redirect('/games')
 end
@@ -143,15 +176,16 @@ end
 # @param [Integer] :id, The id of the selected game
 #
 # @see Model#get_game_info
+# @see Model#get_related_comments
 get('/games/:id') do
     id = params[:id].to_i
     user_id = session[:id]
-    is_liked = get_like_info(id,user_id)
     info = get_game_info(id)
-    slim(:"games/show",locals:{game:info[0],studio:info[1],tags:info[2],is_liked:is_liked})
+    comments = get_related_comments(id)
+    slim(:"games/show",locals:{game:info[0],studio:info[1],tags:info[2],comments:comments})
 end
 
-# Creates a new user and redirects to start page if creating was successful
+# Creates a new user and redirects to game page if creating was successful
 # If user creation failed, redirects to /error
 #
 # @param [String] username, The name of the created user
@@ -161,13 +195,22 @@ end
 # @param [String] admin_key, Key which needs to be entered when creating an admin account
 #
 # @see Model#register_user
-post('/users/new') do
+post('/users') do
     username = params[:username]
     password = params[:password]
     password_confirm = params[:password_confirm]
     usertype = params[:usertype].to_i
     admin_key = params[:adminkey]
-    register_user(username, password, password_confirm, usertype, admin_key)
+    if username == "" or password == "" or password_confirm == ""
+        session[:error] = "Fälten får inte vara tomma"
+        redirect('/error')
+    end
+    if !register_user(username, password, password_confirm, usertype, admin_key)
+        session[:error] = "Skapandet av användaren misslyckades."
+        redirect('/error')
+    else
+        redirect('/games')
+    end
 end
 
 # Displays login form
@@ -186,5 +229,106 @@ end
 post('/users/login') do
     username = params[:username]
     password = params[:password]
-    login_user(username, password)
+    if username == "" or password == ""
+        session[:error] = "Fälten får inte vara tomma"
+        redirect('/error')
+    end
+    if session[:last_login] != nil
+        if Time.now - session[:last_login] < 5
+            session[:error] = "Du måste vänta längre mellan inloggningar"
+            redirect('/error')
+        end
+    end
+    if !login_user(username, password)
+        session[:error] = "Inloggningen misslyckades, fel lösenord eller användarnamn."
+        redirect('/error')
+    else
+        session[:last_login] = Time.now
+        redirect('/games')
+    end
+end
+
+# Displays comment form for a game
+#
+get('/comments/:id/new') do
+    session[:current_game] = params[:id]
+    slim(:"/comments/new")
+end
+
+# Adds new comment to database
+#
+# @param [String] comment, comment that user wrote
+# @param [Integer] game_id, id of current game
+# @param [Integer] user_id, id of current user
+#
+# @see Model#add_comment
+post('/comments') do
+    comment = params[:comment]
+    game_id = session[:current_game]
+    user_id = session[:id]
+    add_comment(comment,game_id,user_id)
+    redirect('/games')
+end
+
+# Displays all user comments
+#
+# @param [Integer] id, id of current user
+#
+# @see Model#get_user_comments
+get('/comments') do
+    id = session[:id]
+    comments = get_user_comments(id)
+    slim(:"/comments/index",locals:{comments:comments})
+end
+
+# Deletes comment
+#
+# @param [Integer] id, id of comment
+#
+# @see Model#delete_comment
+post('/comments/:id/delete') do
+    id = params[:id]
+    if !check_edit_rights(id,session[:id])
+        session[:error] = "Du har inte behörighet"
+        redirect('/error')
+    end
+    delete_comment(id)
+    redirect('/games')
+end
+
+# Checks if user has rights to edit commet before showing edit form
+before('/comments/:id/edit') do
+    if !check_edit_rights(params[:id],session[:id])
+        session[:error] = "Du har inte behörighet"
+        redirect('/error')
+    end
+end
+
+# Shows form to edit comment
+#
+# @param [Integer] id, id of comment
+#
+# @see Model#get_comment_info
+# @see Model#get_database
+get('/comments/:id/edit') do
+    id = params[:id]
+    comment = get_comment_info(id)
+    slim(:"comments/edit",locals:{comment:comment})
+end
+
+# Edits comment
+#
+# @param [Integer] id, id of comment
+# @param [String] comment, comment from user
+#
+# @see Model#edit_comment
+post('/comments/:id/edit') do
+    id = params[:id]
+    comment = params[:comment]
+    if comment == ""
+        session[:error] = "Fältet får inte vara tomt"
+        redirect('/error')
+    end
+    edit_comment(id,comment)
+    redirect('/games')
 end

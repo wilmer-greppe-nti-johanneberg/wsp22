@@ -28,8 +28,12 @@ section.menu > a {
     left: 40px;
 }
 
+#comments {
+    left: 80px;
+}
+
 #login {
-    left: 80%;
+    left: 60%;
 }
 
 main {

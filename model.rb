@@ -16,26 +16,30 @@ module Model
     # If not logged in, redirects to error page
     #
     # @param [Integer] :id, id of user who is logged in
-    def check_login_status()
-        if session[:id] == nil
-            session[:error] = "Du måste vara inloggad för att se detta innehåll!"
-            redirect('/error')
+    #
+    # @return [Boolean] false if no account is logged in
+    def check_login_status(id)
+        if id == nil
+            return false
         end
+        return true
     end
     
     # Checks if user has admin rights
     # If admin rights doesn't exist, redirects to error page
     #
-    # @param [Integer] :id, id of user who is logged in
+    # @param [Integer] id, id of user who is logged in
     #
     # @see Model#get_database
-    def check_admin_rights()
+    #
+    # @return [Boolean] returns false if no account is logged in
+    def check_admin_rights(id)
         db = get_database('db/data.db')
-        user = db.execute("SELECT usertype FROM users WHERE id = ?",session[:id]).first
+        user = db.execute("SELECT usertype FROM users WHERE id = ?",id).first
         if user["usertype"] != 2
-            session[:error] = "Du har ej behörighet att visa innehållet"
-            redirect('/error')
+            return false
         end
+        return true
     end
     
     # Checks if entered game tags are unique
@@ -62,18 +66,20 @@ module Model
         return db.execute("SELECT * FROM games")
     end
     
-    # Creates a new game and redirects to "/games"
+    # Creates a new game
     #
     # @param [String] title, The title of the game
     # @param [Float] price, The price of the game
     # @param [Array] tags, An array containing the tags of the game
     # @param [String] studioname, The title of the game studio
     #
+    # @see Model#check_for_unique_tags
     # @see Model#get_database
+    #
+    # @return [Boolean] true if game was successfully created
     def create_new_game(title, price, tags, studioname)
         if !check_for_unique_tags(tags)
-            session[:error] = "Taggarna är inte unika"
-            redirect('/error')
+            return false
         end
         db = get_database('db/data.db')
         studio = db.execute("SELECT id FROM studios WHERE name = ?",studioname).first
@@ -92,10 +98,9 @@ module Model
             genres.each do |genre|
                 db.execute("INSERT INTO game_genre_relation (game_id,genre_id) VALUES (?,?)",game["id"],genre["id"])
             end
-            redirect('/games')
+            return true
         else
-            session[:error] = "Ett fel uppstod: Spelet finns redan!"
-            redirect('/error')
+            return false
         end
     end
     
@@ -171,7 +176,6 @@ module Model
     def get_game_info(id)
         db = get_database('db/data.db')
         result = db.execute("SELECT * FROM games WHERE id = ?",id).first
-        p result
         studio = db.execute("SELECT * FROM studios WHERE id = ?",result["studio_id"]).first
         tags = db.execute("SELECT title FROM genres INNER JOIN game_genre_relation ON genres.id == game_genre_relation.genre_id WHERE game_genre_relation.game_id = ?",id)
         return [result, studio, tags]
@@ -187,11 +191,12 @@ module Model
     # @param [String] admin_key, Key which needs to be entered when creating an admin account
     #
     # @see Model#get_database
+    #
+    # @return [Boolean] true if new account was created
     def register_user(username, password, password_confirm, usertype, admin_key)
         current_admin_key = "NTI2022"
         if usertype == 2 && admin_key != current_admin_key
-            session[:error] = "Du saknar behörighet att skapa adminkonto!"
-            redirect('/error')
+            return false
         end
         db = get_database('db/data.db')
         result = db.execute("SELECT id FROM users WHERE username = ?", username)
@@ -199,14 +204,12 @@ module Model
             if password == password_confirm
                 password_digest = BCrypt::Password.create(password)
                 db.execute("INSERT INTO users (username,password,usertype) VALUES(?,?,?)", username,password_digest,usertype)
-                redirect('/')
+                return true
             else
-                session[:error] = "Ett fel uppstod: Lösenorden matchade inte!"
-                redirect('/error')
+                return false
             end
         else
-            session[:error] = "Ett fel uppstod: Användaren finns redan!"
-            redirect('/error')
+            return false
         end
     end
     
@@ -218,6 +221,8 @@ module Model
     # @param [String] password, password of account to login to
     #
     # @see Model#get_database
+    #
+    # @return [Boolean] true if login was a success
     def login_user(username, password)
         db = get_database('db/data.db')
         result = db.execute("SELECT * FROM users WHERE username = ?",username).first
@@ -226,14 +231,93 @@ module Model
             id = result["id"]
             if BCrypt::Password.new(pwdigest) == password
                 session[:id] = id
-                user = db.execute("SELECT usertype FROM users WHERE id = ?",session[:id]).first
+                user = db.execute("SELECT usertype FROM users WHERE id = ?",id).first
                 if user["usertype"] == 2
                     session[:is_admin] = true
                 end
-                redirect('/games')
+                return true
             end
         end
-        session[:error] = "Fel lösenord eller användarnamn!"
-        redirect('/error')
+        return false
+    end
+
+    # Adds comment to database
+    #
+    # @param [String] comment, comment from user
+    # @param [Integer] game_id, id of current game
+    # @param [Integer] user_id, id of current user
+    #
+    # @see Model#get_database
+    def add_comment(comment,game_id,user_id)
+        db = get_database('db/data.db')
+        db.execute("INSERT INTO game_user_relation (game_id,user_id,comment) VALUES (?,?,?)",game_id,user_id,comment)
+    end
+
+    # Gets all comments related to current game
+    #
+    # @param [Integer] game_id, id of current game
+    #
+    # @return [Array] array containing hashes with every related comment
+    def get_related_comments(game_id)
+        db = get_database('db/data.db')
+        return db.execute("SELECT * FROM game_user_relation WHERE game_id = ?",game_id)
+    end
+
+    # Gets all comments related to current user
+    #
+    # @param [Integer] user_id, id of current user
+    #
+    # @return [Array] array containing hashes with every related comment
+    def get_user_comments(user_id)
+        db = get_database('db/data.db')
+        return db.execute("SELECT * FROM game_user_relation WHERE user_id = ?",user_id)
+    end
+
+    # Checks if user has the right to edit comment or is admin
+    #
+    # @param
+    #
+    # @see Model#get_database
+    #
+    def check_edit_rights(id,logged_in_user)
+        db = get_database('db/data.db')
+        user = db.execute("SELECT user_id FROM game_user_relation WHERE id = ?",id).first
+        if check_admin_rights(logged_in_user) or logged_in_user == user['user_id']
+            return true
+        end
+        return false
+    end
+
+    # Deletes comment from database
+    #
+    # @param [Integer] id, id of comment
+    #
+    # @see Model#get_database
+    def delete_comment(id)
+        db = get_database('db/data.db')
+        db.execute("DELETE FROM game_user_relation WHERE id = ?",id)
+    end
+
+    # Get comment description
+    #
+    # @param [Integer] id, id of comment
+    #
+    # @see Model#get_database
+    #
+    # @return [Hash] hash containing comment info
+    def get_comment_info(id)
+        db = get_database('db/data.db')
+        return db.execute("SELECT * FROM game_user_relation WHERE id = ?",id).first
+    end
+
+    # Edits comment in database
+    #
+    # @param [Integer] id, id of comment 
+    # @param [String] comment, comment from user
+    #
+    # @see Model#get_database
+    def edit_comment(id,comment)
+        db = get_database('db/data.db')
+        db.execute("UPDATE game_user_relation SET comment = ? WHERE id = ?",comment,id)
     end
 end
