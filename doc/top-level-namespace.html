@@ -401,7 +401,7 @@
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="top-level-namespace.html#POST__comments__id_edit-instance_method" title="#POST /comments/:id/edit (instance method)">#<strong>POST /comments/:id/edit</strong>  &#x21d2; Object </a>
+      <a href="top-level-namespace.html#POST__comments__id_update-instance_method" title="#POST /comments/:id/update (instance method)">#<strong>POST /comments/:id/update</strong>  &#x21d2; Object </a>
     
 
     
@@ -660,14 +660,14 @@
       <pre class="lines">
 
 
-278
-279
-280
 281
-282</pre>
+282
+283
+284
+285</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'app.rb', line 278</span>
+      <pre class="code"><span class="info file"># File 'app.rb', line 281</span>
 
 <span class='id identifier rubyid_get'>get</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>/comments</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span> <span class='kw'>do</span>
     <span class='id identifier rubyid_id'>id</span> <span class='op'>=</span> <span class='id identifier rubyid_session'>session</span><span class='lbracket'>[</span><span class='symbol'>:id</span><span class='rbracket'>]</span>
@@ -736,14 +736,14 @@
       <pre class="lines">
 
 
-313
-314
-315
 316
-317</pre>
+317
+318
+319
+320</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'app.rb', line 313</span>
+      <pre class="code"><span class="info file"># File 'app.rb', line 316</span>
 
 <span class='id identifier rubyid_get'>get</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>/comments/:id/edit</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span> <span class='kw'>do</span>
     <span class='id identifier rubyid_id'>id</span> <span class='op'>=</span> <span class='id identifier rubyid_params'>params</span><span class='lbracket'>[</span><span class='symbol'>:id</span><span class='rbracket'>]</span>
@@ -783,13 +783,13 @@
       <pre class="lines">
 
 
-253
-254
-255
-256</pre>
+256
+257
+258
+259</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'app.rb', line 253</span>
+      <pre class="code"><span class="info file"># File 'app.rb', line 256</span>
 
 <span class='id identifier rubyid_get'>get</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>/comments/:id/new</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span> <span class='kw'>do</span>
     <span class='id identifier rubyid_session'>session</span><span class='lbracket'>[</span><span class='symbol'>:current_game</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_params'>params</span><span class='lbracket'>[</span><span class='symbol'>:id</span><span class='rbracket'>]</span>
@@ -1224,16 +1224,16 @@
       <pre class="lines">
 
 
-265
-266
-267
 268
 269
 270
-271</pre>
+271
+272
+273
+274</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'app.rb', line 265</span>
+      <pre class="code"><span class="info file"># File 'app.rb', line 268</span>
 
 <span class='id identifier rubyid_post'>post</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>/comments</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span> <span class='kw'>do</span>
     <span class='id identifier rubyid_comment'>comment</span> <span class='op'>=</span> <span class='id identifier rubyid_params'>params</span><span class='lbracket'>[</span><span class='symbol'>:comment</span><span class='rbracket'>]</span>
@@ -1302,18 +1302,18 @@
       <pre class="lines">
 
 
-289
-290
-291
 292
 293
 294
 295
 296
-297</pre>
+297
+298
+299
+300</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'app.rb', line 289</span>
+      <pre class="code"><span class="info file"># File 'app.rb', line 292</span>
 
 <span class='id identifier rubyid_post'>post</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>/comments/:id/delete</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span> <span class='kw'>do</span>
     <span class='id identifier rubyid_id'>id</span> <span class='op'>=</span> <span class='id identifier rubyid_params'>params</span><span class='lbracket'>[</span><span class='symbol'>:id</span><span class='rbracket'>]</span>
@@ -1330,9 +1330,9 @@
 </div>
     
       <div class="method_details ">
-  <h3 class="signature " id="POST__comments__id_edit-instance_method">
+  <h3 class="signature " id="POST__comments__id_update-instance_method">
   
-    #<strong>POST /comments/:id/edit</strong>  &#x21d2; <tt>Object</tt> 
+    #<strong>POST /comments/:id/update</strong>  &#x21d2; <tt>Object</tt> 
   
 
   
@@ -1400,21 +1400,21 @@
       <pre class="lines">
 
 
-325
-326
-327
 328
 329
 330
 331
 332
 333
-334</pre>
+334
+335
+336
+337</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'app.rb', line 325</span>
+      <pre class="code"><span class="info file"># File 'app.rb', line 328</span>
 
-<span class='id identifier rubyid_post'>post</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>/comments/:id/edit</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span> <span class='kw'>do</span>
+<span class='id identifier rubyid_post'>post</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>/comments/:id/update</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span> <span class='kw'>do</span>
     <span class='id identifier rubyid_id'>id</span> <span class='op'>=</span> <span class='id identifier rubyid_params'>params</span><span class='lbracket'>[</span><span class='symbol'>:id</span><span class='rbracket'>]</span>
     <span class='id identifier rubyid_comment'>comment</span> <span class='op'>=</span> <span class='id identifier rubyid_params'>params</span><span class='lbracket'>[</span><span class='symbol'>:comment</span><span class='rbracket'>]</span>
     <span class='kw'>if</span> <span class='id identifier rubyid_comment'>comment</span> <span class='op'>==</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_end'>&quot;</span></span>
@@ -2074,7 +2074,10 @@
 246
 247
 248
-249</pre>
+249
+250
+251
+252</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'app.rb', line 229</span>
@@ -2092,11 +2095,14 @@
             <span class='id identifier rubyid_redirect'>redirect</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>/error</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span>
         <span class='kw'>end</span>
     <span class='kw'>end</span>
-    <span class='kw'>if</span> <span class='op'>!</span><span class='id identifier rubyid_login_user'><span class='object_link'><a href="Model.html#login_user-instance_method" title="Model#login_user (method)">login_user</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_username'>username</span><span class='comma'>,</span> <span class='id identifier rubyid_password'>password</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_result'>result</span> <span class='op'>=</span> <span class='id identifier rubyid_login_user'><span class='object_link'><a href="Model.html#login_user-instance_method" title="Model#login_user (method)">login_user</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_username'>username</span><span class='comma'>,</span> <span class='id identifier rubyid_password'>password</span><span class='rparen'>)</span>
+    <span class='kw'>if</span> <span class='op'>!</span><span class='id identifier rubyid_result'>result</span><span class='lbracket'>[</span><span class='int'>0</span><span class='rbracket'>]</span>
         <span class='id identifier rubyid_session'>session</span><span class='lbracket'>[</span><span class='symbol'>:error</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Inloggningen misslyckades, fel lösenord eller användarnamn.</span><span class='tstring_end'>&quot;</span></span>
         <span class='id identifier rubyid_redirect'>redirect</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>/error</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span>
     <span class='kw'>else</span>
         <span class='id identifier rubyid_session'>session</span><span class='lbracket'>[</span><span class='symbol'>:last_login</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='const'>Time</span><span class='period'>.</span><span class='id identifier rubyid_now'>now</span>
+        <span class='id identifier rubyid_session'>session</span><span class='lbracket'>[</span><span class='symbol'>:id</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_result'>result</span><span class='lbracket'>[</span><span class='int'>1</span><span class='rbracket'>]</span>
+        <span class='id identifier rubyid_session'>session</span><span class='lbracket'>[</span><span class='symbol'>:is_admin</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_result'>result</span><span class='lbracket'>[</span><span class='int'>2</span><span class='rbracket'>]</span>
         <span class='id identifier rubyid_redirect'>redirect</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>/games</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span>
     <span class='kw'>end</span>
 <span class='kw'>end</span></pre>
@@ -2110,7 +2116,7 @@
 </div>
 
       <div id="footer">
-  Generated on Sat May 14 17:48:10 2022 by
+  Generated on Mon May 16 15:38:29 2022 by
   <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.27 (ruby-3.0.2).
 </div>

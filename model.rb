@@ -222,7 +222,10 @@ module Model
     #
     # @see Model#get_database
     #
-    # @return [Boolean] true if login was a success
+    # @return [Array]
+    #   * [Boolean] true if user was logged in
+    #   * [Integer] id of user who was logged in
+    #   * [Boolean] true if user who was logged in an admin account
     def login_user(username, password)
         db = get_database('db/data.db')
         result = db.execute("SELECT * FROM users WHERE username = ?",username).first
