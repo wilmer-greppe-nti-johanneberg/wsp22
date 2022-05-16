@@ -239,11 +239,14 @@ post('/users/login') do
             redirect('/error')
         end
     end
-    if !login_user(username, password)
+    result = login_user(username, password)
+    if !result[0]
         session[:error] = "Inloggningen misslyckades, fel lösenord eller användarnamn."
         redirect('/error')
     else
         session[:last_login] = Time.now
+        session[:id] = result[1]
+        session[:is_admin] = result[2]
         redirect('/games')
     end
 end
@@ -322,7 +325,7 @@ end
 # @param [String] comment, comment from user
 #
 # @see Model#edit_comment
-post('/comments/:id/edit') do
+post('/comments/:id/update') do
     id = params[:id]
     comment = params[:comment]
     if comment == ""

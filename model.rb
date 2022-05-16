@@ -230,12 +230,8 @@ module Model
             pwdigest = result["password"]
             id = result["id"]
             if BCrypt::Password.new(pwdigest) == password
-                session[:id] = id
                 user = db.execute("SELECT usertype FROM users WHERE id = ?",id).first
-                if user["usertype"] == 2
-                    session[:is_admin] = true
-                end
-                return true
+                return [true, id, user["usertype"] == 2]
             end
         end
         return false
